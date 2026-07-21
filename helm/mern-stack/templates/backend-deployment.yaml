@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: backend
+  namespace: {{ .Values.namespace }}
+
+spec:
+  replicas: {{ .Values.backend.replicaCount }}
+
+  selector:
+    matchLabels:
+      app: backend
+
+  template:
+    metadata:
+      labels:
+        app: backend
+
+    spec:
+      containers:
+        - name: backend
+
+          image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag }}"
+          imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
+
+          ports:
+            - containerPort: {{ .Values.backend.service.targetPort }}
+
+          env:
+            - name: PORT
+              value: "{{ .Values.config.PORT }}"
+
+            - name: USE_DB_AUTH
+              value: "true"
+
+            - name: MONGO_USERNAME
+              value: "{{ .Values.mongodb.username }}"
+
+            - name: MONGO_PASSWORD
+              value: "{{ .Values.mongodb.password }}"
+
+            - name: MONGO_CONN_STR
+              value: "mongodb://{{ .Values.mongodb.username }}:{{ .Values.mongodb.password }}@mongodb-service:27017/{{ .Values.mongodb.database }}?authSource=admin"
+
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: {{ .Values.backend.service.targetPort }}
+            initialDelaySeconds: 30
+            periodSeconds: 10
+
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: {{ .Values.backend.service.targetPort }}
+            initialDelaySeconds: 20
+            periodSeconds: 10
+
+          startupProbe:
+            httpGet:
+              path: /started
+              port: {{ .Values.backend.service.targetPort }}
+            failureThreshold: 30
+            periodSeconds: 10

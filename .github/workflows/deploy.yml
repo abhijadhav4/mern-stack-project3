@@ -1,0 +1,134 @@
+name: Build and Deploy MERN to AWS EKS
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  AWS_REGION: ap-south-1
+  EKS_CLUSTER_NAME: mern-eks-cluster
+  FRONTEND_REPOSITORY: frontend
+  BACKEND_REPOSITORY: backend
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      id-token: write
+
+    steps:
+      ####################################################
+      # Checkout Repository
+      ####################################################
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      ####################################################
+      # Configure AWS Credentials
+      ####################################################
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      ####################################################
+      # Login to Amazon ECR
+      ####################################################
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      ####################################################
+      # Set Image Tag
+      ####################################################
+      - name: Set Image Tag
+        run: echo "IMAGE_TAG=${GITHUB_SHA::7}" >> $GITHUB_ENV
+
+      ####################################################
+      # Build and Push Backend Docker Image
+      ####################################################
+      - name: Build and Push Backend Image
+        run: |
+          docker build \
+          -t ${{ steps.login-ecr.outputs.registry }}/${{ env.BACKEND_REPOSITORY }}:${{ env.IMAGE_TAG }} \
+          -t ${{ steps.login-ecr.outputs.registry }}/${{ env.BACKEND_REPOSITORY }}:latest \
+          ./Application-Code/backend
+          docker push ${{ steps.login-ecr.outputs.registry }}/${{ env.BACKEND_REPOSITORY }}:${{ env.IMAGE_TAG }}
+          docker push ${{ steps.login-ecr.outputs.registry }}/${{ env.BACKEND_REPOSITORY }}:latest
+
+      ####################################################
+      # Build and Push Frontend Docker Image
+      ####################################################
+      - name: Build and Push Frontend Image
+        run: |
+          docker build \
+          -t ${{ steps.login-ecr.outputs.registry }}/${{ env.FRONTEND_REPOSITORY }}:${{ env.IMAGE_TAG }} \
+          -t ${{ steps.login-ecr.outputs.registry }}/${{ env.FRONTEND_REPOSITORY }}:latest \
+          ./Application-Code/frontend
+          docker push ${{ steps.login-ecr.outputs.registry }}/${{ env.FRONTEND_REPOSITORY }}:${{ env.IMAGE_TAG }}
+          docker push ${{ steps.login-ecr.outputs.registry }}/${{ env.FRONTEND_REPOSITORY }}:latest
+
+      ####################################################
+      # Update Helm values.yaml with new image tag
+      ####################################################
+      - name: Update Helm Image Tag
+        run: |
+          sed -i "s/tag:.*/tag: ${{ env.IMAGE_TAG }}/" helm/mern-stack/values.yaml
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add helm/mern-stack/values.yaml
+          git diff --staged --quiet || git commit -m "ci: update image tag to ${{ env.IMAGE_TAG }}"
+          git push
+
+      ####################################################
+      # Install kubectl
+      ####################################################
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: latest
+
+      ####################################################
+      # Install Helm
+      ####################################################
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+
+      ####################################################
+      # Connect GitHub Actions to EKS
+      ####################################################
+      - name: Update kubeconfig
+        run: |
+          aws eks update-kubeconfig \
+          --region $AWS_REGION \
+          --name $EKS_CLUSTER_NAME
+
+      ####################################################
+      # Deploy using Helm
+      ####################################################
+      - name: Helm Upgrade
+        run: |
+          helm upgrade --install mern-stack ./helm/mern-stack \
+          --namespace mern \
+          --create-namespace \
+          --set frontend.image.tag=${{ env.IMAGE_TAG }} \
+          --set backend.image.tag=${{ env.IMAGE_TAG }}
+
+      ####################################################
+      # Verify Deployment
+      ####################################################
+      - name: Verify Pods
+        run: kubectl get pods -n mern
+
+      - name: Verify Services
+        run: kubectl get svc -n mern
+
+      - name: Verify Deployment
+        run: kubectl get deployment -n mern

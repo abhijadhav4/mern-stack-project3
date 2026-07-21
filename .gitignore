@@ -1,0 +1,31 @@
+# Terraform
+terraform/.terraform/
+terraform/terraform.tfstate
+terraform/terraform.tfstate.backup
+terraform.tfstate
+terraform.tfstate.backup
+*.tfstate
+*.tfstate.backup
+.terraform.lock.hcl
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Environment - scope to root only, not application code
+.env.local
+.env.production
+
+# Root level env only
+/.env
+
+# Build
+build/
+dist/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Kubernetes secrets (local overrides)
+kubernetes/secret-local.yaml

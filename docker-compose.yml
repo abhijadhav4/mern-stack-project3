@@ -1,0 +1,76 @@
+version: "3.9"
+
+services:
+
+  mongodb:
+
+    image: mongo:7
+
+    container_name: mongodb
+
+    restart: always
+
+    ports:
+      - "27017:27017"
+
+    volumes:
+      - mongodb-data:/data/db
+
+    networks:
+      - mern-network
+
+
+  backend:
+
+    build:
+      context: ./Application-Code/backend
+
+    container_name: backend
+
+    restart: always
+
+    ports:
+      - "3500:3500"
+
+    environment:
+      PORT: 3500
+      MONGO_CONN_STR: mongodb://mongodb:27017/tododb
+      USE_DB_AUTH: "false"
+
+    depends_on:
+      - mongodb
+
+    networks:
+      - mern-network
+
+
+  frontend:
+
+    build:
+      context: ./Application-Code/frontend
+
+    container_name: frontend
+
+    restart: always
+
+    ports:
+      - "3000:3000"
+
+    environment:
+      REACT_APP_API_URL: http://backend:3500/api/tasks
+
+    depends_on:
+      - backend
+
+    networks:
+      - mern-network
+
+
+volumes:
+
+  mongodb-data:
+
+
+networks:
+
+  mern-network:

@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+
+metadata:
+  name: mern-config
+  namespace: {{ .Values.namespace }}
+
+data:
+
+  PORT: "{{ .Values.config.PORT }}"
+
+  REACT_APP_API_URL: "{{ .Values.config.REACT_APP_API_URL }}"

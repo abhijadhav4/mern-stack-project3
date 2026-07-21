@@ -1,0 +1,60 @@
+server:
+  enabled: true
+
+  service:
+    type: LoadBalancer
+
+  persistentVolume:
+    enabled: true
+    size: 10Gi
+
+alertmanager:
+  enabled: true
+
+  service:
+    type: ClusterIP
+
+kubeStateMetrics:
+  enabled: true
+
+nodeExporter:
+  enabled: true
+
+pushgateway:
+  enabled: false
+
+rbac:
+  create: true
+
+serviceAccounts:
+  server:
+    create: true
+
+serverFiles:
+  prometheus.yml:
+    global:
+      scrape_interval: 15s
+
+    scrape_configs:
+
+      - job_name: "prometheus"
+
+        static_configs:
+          - targets:
+              - localhost:9090
+
+      - job_name: "kubernetes-pods"
+
+        kubernetes_sd_configs:
+          - role: pod
+
+      - job_name: "kubernetes-services"
+
+        kubernetes_sd_configs:
+          - role: service
+
+      - job_name: "backend"
+
+        static_configs:
+          - targets:
+              - backend-service:3500

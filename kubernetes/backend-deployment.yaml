@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: backend
+  namespace: mern
+
+spec:
+  replicas: 2
+
+  selector:
+    matchLabels:
+      app: backend
+
+  template:
+    metadata:
+      labels:
+        app: backend
+
+    spec:
+      containers:
+        - name: backend
+
+          image: 224193574273.dkr.ecr.ap-south-1.amazonaws.com/backend:latest
+
+          imagePullPolicy: Always
+
+          ports:
+            - containerPort: 3500
+
+          env:
+
+            - name: PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: mern-config
+                  key: PORT
+
+            - name: USE_DB_AUTH
+              value: "true"
+
+            - name: MONGO_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mern-secret
+                  key: MONGO_USERNAME
+
+            - name: MONGO_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mern-secret
+                  key: MONGO_PASSWORD
+
+            - name: MONGO_CONN_STR
+              valueFrom:
+                secretKeyRef:
+                  name: mern-secret
+                  key: MONGO_CONN_STR
+
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 3500
+            initialDelaySeconds: 30
+            periodSeconds: 10
+
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 3500
+            initialDelaySeconds: 20
+            periodSeconds: 10
+
+          startupProbe:
+            httpGet:
+              path: /started
+              port: 3500
+            failureThreshold: 30
+            periodSeconds: 10

@@ -1,0 +1,78 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+
+metadata:
+  name: mern-alert-rules
+  namespace: monitoring
+
+  labels:
+    release: prometheus
+
+spec:
+  groups:
+
+    - name: mern.pod.alerts
+      rules:
+
+        - alert: PodCrashLooping
+          expr: rate(kube_pod_container_status_restarts_total{namespace="mern"}[5m]) > 0
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Pod {{ $labels.pod }} is crash looping"
+            description: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} is restarting frequently."
+
+        - alert: PodNotReady
+          expr: kube_pod_status_ready{namespace="mern", condition="true"} == 0
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Pod {{ $labels.pod }} is not ready"
+            description: "Pod {{ $labels.pod }} has been not ready for more than 5 minutes."
+
+    - name: mern.deployment.alerts
+      rules:
+
+        - alert: DeploymentReplicasMismatch
+          expr: kube_deployment_spec_replicas{namespace="mern"} != kube_deployment_status_available_replicas{namespace="mern"}
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Deployment {{ $labels.deployment }} replicas mismatch"
+            description: "Deployment {{ $labels.deployment }} has fewer available replicas than desired."
+
+    - name: mern.node.alerts
+      rules:
+
+        - alert: HighCPUUsage
+          expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "High CPU usage on {{ $labels.instance }}"
+            description: "CPU usage is above 80% on {{ $labels.instance }}."
+
+        - alert: HighMemoryUsage
+          expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100 > 85
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "High memory usage on {{ $labels.instance }}"
+            description: "Memory usage is above 85% on {{ $labels.instance }}."
+
+    - name: mern.backend.alerts
+      rules:
+
+        - alert: BackendDown
+          expr: up{job="backend"} == 0
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Backend service is down"
+            description: "The backend service has been unreachable for more than 1 minute."

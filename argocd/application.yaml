@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+
+metadata:
+  name: mern-stack
+  namespace: argocd
+
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/abhijadhav4/mern-stack-project3.git
+    targetRevision: main
+    path: helm/mern-stack
+
+    helm:
+      valueFiles:
+        - values.yaml
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: mern
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+
+    syncOptions:
+      - CreateNamespace=true

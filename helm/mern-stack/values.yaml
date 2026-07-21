@@ -1,0 +1,56 @@
+# Namespace
+namespace: mern
+
+# Frontend Image
+frontend:
+  replicaCount: 2
+
+  image:
+    repository: 224193574273.dkr.ecr.ap-south-1.amazonaws.com/frontend
+    tag: latest
+    pullPolicy: Always
+
+  service:
+    type: LoadBalancer
+    port: 80
+    targetPort: 3000
+
+# Backend Image
+backend:
+  replicaCount: 2
+
+  image:
+    repository: 224193574273.dkr.ecr.ap-south-1.amazonaws.com/backend
+    tag: latest
+    pullPolicy: Always
+
+  service:
+    type: ClusterIP
+    port: 3500
+    targetPort: 3500
+
+# MongoDB
+mongodb:
+  image: mongo:7.0
+
+  username: admin
+  password: admin123
+  database: todo
+
+  service:
+    port: 27017
+
+  storage: 5Gi
+
+# ConfigMap Values
+config:
+  PORT: "3500"
+  REACT_APP_API_URL: "http://backend-service:3500/api/tasks"
+
+# Ingress
+ingress:
+  enabled: true
+
+  className: nginx
+
+  host: mern.local

@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: ConfigMap
+
+metadata:
+  name: mern-config
+  namespace: mern
+
+data:
+
+  ###################################
+  # Backend Configuration
+  ###################################
+
+  PORT: "3500"
+
+  ###################################
+  # MongoDB Configuration
+  ###################################
+
+  MONGO_DATABASE: "todo"
+
+  MONGO_HOST: "mongodb-service"
+
+  MONGO_PORT: "27017"
+
+  ###################################
+  # Frontend Configuration
+  ###################################
+
+  REACT_APP_API_URL: "http://backend-service:3500/api/tasks"
