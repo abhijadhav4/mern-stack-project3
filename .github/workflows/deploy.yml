@@ -79,6 +79,7 @@ jobs:
             --create-namespace \
             --wait \
             --timeout 10m \
+            --force \
             --set frontend.image.repository=${{ steps.login-ecr.outputs.registry }}/frontend \
             --set frontend.image.tag=${{ env.IMAGE_TAG }} \
             --set backend.image.repository=${{ steps.login-ecr.outputs.registry }}/backend \
