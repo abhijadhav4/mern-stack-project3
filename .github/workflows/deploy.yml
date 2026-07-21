@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 env:
-Secret access key  AWS_REGION: ap-south-1
+  AWS_REGION: ap-south-1
   EKS_CLUSTER_NAME: mern-eks-cluster
   FRONTEND_REPOSITORY: frontend
   BACKEND_REPOSITORY: backend
