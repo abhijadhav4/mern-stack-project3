@@ -29,7 +29,10 @@ spec:
 
           env:
             - name: REACT_APP_API_URL
-              value: "{{ .Values.config.REACT_APP_API_URL }}"
+              valueFrom:
+                configMapKeyRef:
+                  name: mern-config
+                  key: REACT_APP_API_URL
 
           livenessProbe:
             httpGet:

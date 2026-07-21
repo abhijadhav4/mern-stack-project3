@@ -45,7 +45,7 @@ mongodb:
 # ConfigMap Values
 config:
   PORT: "3500"
-  REACT_APP_API_URL: "http://backend-service:3500/api/tasks"
+  REACT_APP_API_URL: "http://mern.local/api/tasks"
 
 # Ingress
 ingress:

@@ -29,19 +29,31 @@ spec:
 
           env:
             - name: PORT
-              value: "{{ .Values.config.PORT }}"
+              valueFrom:
+                configMapKeyRef:
+                  name: mern-config
+                  key: PORT
 
             - name: USE_DB_AUTH
               value: "true"
 
             - name: MONGO_USERNAME
-              value: "{{ .Values.mongodb.username }}"
+              valueFrom:
+                secretKeyRef:
+                  name: mern-secret
+                  key: MONGO_USERNAME
 
             - name: MONGO_PASSWORD
-              value: "{{ .Values.mongodb.password }}"
+              valueFrom:
+                secretKeyRef:
+                  name: mern-secret
+                  key: MONGO_PASSWORD
 
             - name: MONGO_CONN_STR
-              value: "mongodb://{{ .Values.mongodb.username }}:{{ .Values.mongodb.password }}@mongodb-service:27017/{{ .Values.mongodb.database }}?authSource=admin"
+              valueFrom:
+                secretKeyRef:
+                  name: mern-secret
+                  key: MONGO_CONN_STR
 
           livenessProbe:
             httpGet:
