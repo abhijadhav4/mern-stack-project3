@@ -1,11 +1,6 @@
 apiVersion: v2
-
 name: mern-stack
-
-description: Helm Chart for MERN Stack Application
-
+description: Helm chart for the MERN stack application
 type: application
-
-version: 0.1.0
-
-appVersion: "1.0.0"
+version: 0.1.1
+appVersion: "1.0.1"
