@@ -7,48 +7,28 @@ on:
   workflow_dispatch:
 
 env:
-  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: "true"
   AWS_REGION: ap-south-1
   EKS_CLUSTER_NAME: mern-eks-cluster
   FRONTEND_REPOSITORY: frontend
   BACKEND_REPOSITORY: backend
   NAMESPACE: mern
-  AWS_ROLE_TO_ASSUME: arn:aws:iam::224193574273:role/mern-stack-dev-github-actions
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Configure AWS credentials via OIDC
-        if: ${{ env.AWS_ROLE_TO_ASSUME != '' }}
+      - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
-          role-session-name: github-actions-mern-stack
-          audience: sts.amazonaws.com
-
-      - name: Configure AWS credentials via secrets
-        if: ${{ env.AWS_ROLE_TO_ASSUME == '' && env.AWS_ACCESS_KEY_ID != '' && env.AWS_SECRET_ACCESS_KEY != '' }}
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Validate AWS authentication
-        run: |
-          if [ -z "${AWS_ROLE_TO_ASSUME}" ] && [ -z "${AWS_ACCESS_KEY_ID}" ]; then
-            echo "Set either AWS_ROLE_TO_ASSUME for OIDC or AWS_ACCESS_KEY_ID/AWS_SECRET_ACCESS_KEY for static credentials."
-            exit 1
-          fi
 
       - name: Login to Amazon ECR
         id: login-ecr
