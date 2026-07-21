@@ -13,9 +13,7 @@ env:
   FRONTEND_REPOSITORY: frontend
   BACKEND_REPOSITORY: backend
   NAMESPACE: mern
-  AWS_ROLE_TO_ASSUME: ${{ secrets.AWS_ROLE_TO_ASSUME }}
-  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_ROLE_TO_ASSUME: arn:aws:iam::224193574273:role/mern-stack-dev-github-actions
 
 jobs:
   deploy:
