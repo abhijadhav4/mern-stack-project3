@@ -80,12 +80,12 @@ jobs:
             --region ${{ env.AWS_REGION }} \
             --name ${{ env.EKS_CLUSTER_NAME }}
 
-      - name: Optional: Install Monitoring (Prometheus/Grafana)
+      - name: Optional Install Monitoring (Prometheus/Grafana)
         if: ${{ env.INSTALL_MONITORING == 'true' }}
         run: |
           bash monitoring/install.sh
 
-      - name: Optional: Install ArgoCD
+      - name: Optional Install ArgoCD
         if: ${{ env.INSTALL_ARGOCD == 'true' }}
         run: |
           kubectl create namespace argocd || true
