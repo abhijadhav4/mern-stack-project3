@@ -5,6 +5,15 @@ on:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      install_monitoring:
+        description: 'Install Prometheus and Grafana (true/false)'
+        required: false
+        default: 'false'
+      install_argocd:
+        description: 'Install ArgoCD (true/false)'
+        required: false
+        default: 'false'
 
 env:
   AWS_REGION: ap-south-1
@@ -12,6 +21,8 @@ env:
   FRONTEND_REPOSITORY: frontend
   BACKEND_REPOSITORY: backend
   NAMESPACE: mern
+  INSTALL_MONITORING: ${{ github.event.inputs.install_monitoring || 'false' }}
+  INSTALL_ARGOCD: ${{ github.event.inputs.install_argocd || 'false' }}
 
 jobs:
   deploy:
@@ -68,6 +79,18 @@ jobs:
           aws eks update-kubeconfig \
             --region ${{ env.AWS_REGION }} \
             --name ${{ env.EKS_CLUSTER_NAME }}
+
+      - name: Optional: Install Monitoring (Prometheus/Grafana)
+        if: ${{ env.INSTALL_MONITORING == 'true' }}
+        run: |
+          bash monitoring/install.sh
+
+      - name: Optional: Install ArgoCD
+        if: ${{ env.INSTALL_ARGOCD == 'true' }}
+        run: |
+          kubectl create namespace argocd || true
+          kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+          kubectl apply -f argocd/application.yaml
 
       - name: Helm lint
         run: helm lint ./helm/mern-stack
