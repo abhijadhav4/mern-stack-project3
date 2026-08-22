@@ -12,6 +12,8 @@ prometheus:
 
 grafana:
   enabled: true
+  service:
+    type: LoadBalancer
   persistence:
     enabled: true
     storageClassName: gp2

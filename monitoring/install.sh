@@ -11,6 +11,9 @@ helm repo add prometheus-community https://prometheus-community.github.io/helm-c
 helm repo add grafana https://grafana.github.io/helm-charts
 helm repo update
 
+echo "=== Removing legacy Grafana release ==="
+helm uninstall grafana --namespace monitoring || true
+
 echo "=== Installing Prometheus Operator CRDs ==="
 helm show crds prometheus-community/kube-prometheus-stack | kubectl apply --server-side -f -
 kubectl wait --for=condition=Established \
