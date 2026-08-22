@@ -22,7 +22,7 @@ env:
   BACKEND_REPOSITORY: backend
   NAMESPACE: mern
   INSTALL_MONITORING: ${{ github.event.inputs.install_monitoring || 'true' }}
-  INSTALL_ARGOCD: ${{ github.event.inputs.install_argocd || 'false' }}
+  INSTALL_ARGOCD: ${{ github.event.inputs.install_argocd || 'true' }}
 
 jobs:
   deploy:
