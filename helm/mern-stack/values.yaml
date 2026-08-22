@@ -6,7 +6,7 @@ frontend:
   replicaCount: 2
 
   image:
-    repository: 224193574273.dkr.ecr.ap-south-1.amazonaws.com/frontend
+    repository: 117097040108.dkr.ecr.ap-south-1.amazonaws.com/frontend
     tag: latest
     pullPolicy: Always
 
@@ -15,12 +15,20 @@ frontend:
     port: 80
     targetPort: 3000
 
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 250m
+      memory: 256Mi
+
 # Backend Image
 backend:
   replicaCount: 2
 
   image:
-    repository: 224193574273.dkr.ecr.ap-south-1.amazonaws.com/backend
+    repository: 117097040108.dkr.ecr.ap-south-1.amazonaws.com/backend
     tag: latest
     pullPolicy: Always
 
@@ -28,6 +36,14 @@ backend:
     type: ClusterIP
     port: 3500
     targetPort: 3500
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 250m
+      memory: 256Mi
 
 # MongoDB
 mongodb:
