@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -euo pipefail
 
 echo "=== Creating monitoring namespace ==="
 kubectl apply -f monitoring/namespace.yaml
@@ -10,6 +10,12 @@ echo "=== Adding Helm repos ==="
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 helm repo add grafana https://grafana.github.io/helm-charts
 helm repo update
+
+echo "=== Installing Prometheus Operator CRDs ==="
+helm show crds prometheus-community/kube-prometheus-stack | kubectl apply --server-side -f -
+kubectl wait --for=condition=Established \
+  --timeout=120s \
+  crd/servicemonitors.monitoring.coreos.com
 
 echo "=== Installing Prometheus Operator stack ==="
 helm upgrade --install prometheus prometheus-community/kube-prometheus-stack \
