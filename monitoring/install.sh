@@ -25,7 +25,7 @@ kubectl apply -f https://raw.githubusercontent.com/kubernetes/autoscaler/master/
 kubectl apply -k https://github.com/kubernetes/autoscaler//vertical-pod-autoscaler/deploy?ref=master
 
 if [[ -z "${SLACK_WEBHOOK_URL:-}" ]]; then
-  echo "SLACK_WEBHOOK_URL must be set before installing monitoring." >&2
+  echo "SLACK_WEBHOOK_URL must be set before installing monitoring. Add the secret in GitHub Actions or export it in your shell." >&2
   exit 1
 fi
 kubectl create secret generic alertmanager-slack \

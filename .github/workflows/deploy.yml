@@ -23,6 +23,7 @@ env:
   NAMESPACE: mern
   INSTALL_MONITORING: ${{ github.event.inputs.install_monitoring || 'true' }}
   INSTALL_ARGOCD: ${{ github.event.inputs.install_argocd || 'true' }}
+  SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
 jobs:
   deploy:
@@ -81,9 +82,15 @@ jobs:
             --name ${{ env.EKS_CLUSTER_NAME }}
 
       - name: Optional Install Monitoring (Prometheus/Grafana)
-        if: ${{ env.INSTALL_MONITORING == 'true' }}
+        if: ${{ env.INSTALL_MONITORING == 'true' && env.SLACK_WEBHOOK_URL != '' }}
         run: |
           bash monitoring/install.sh
+
+      - name: Skip Monitoring Without Slack Secret
+        if: ${{ env.INSTALL_MONITORING == 'true' && env.SLACK_WEBHOOK_URL == '' }}
+        run: |
+          echo "Skipping monitoring install because GitHub secret SLACK_WEBHOOK_URL is not set."
+           
 
       - name: Optional Install ArgoCD
         if: ${{ env.INSTALL_ARGOCD == 'true' }}
