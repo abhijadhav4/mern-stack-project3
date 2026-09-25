@@ -3,6 +3,8 @@ FROM node:18-alpine AS build
 WORKDIR /usr/src/app
 
 ENV NODE_OPTIONS=--openssl-legacy-provider
+ARG REACT_APP_API_URL=/api/tasks
+ENV REACT_APP_API_URL=$REACT_APP_API_URL
 
 COPY package*.json ./
 

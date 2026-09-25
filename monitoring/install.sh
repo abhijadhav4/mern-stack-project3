@@ -20,6 +20,19 @@ kubectl wait --for=condition=Established \
   --timeout=120s \
   crd/servicemonitors.monitoring.coreos.com
 
+echo "=== Installing VPA ==="
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/autoscaler/master/vertical-pod-autoscaler/deploy/vpa-v1-crd-gen.yaml
+kubectl apply -k https://github.com/kubernetes/autoscaler//vertical-pod-autoscaler/deploy?ref=master
+
+if [[ -z "${SLACK_WEBHOOK_URL:-}" ]]; then
+  echo "SLACK_WEBHOOK_URL must be set before installing monitoring." >&2
+  exit 1
+fi
+kubectl create secret generic alertmanager-slack \
+  --namespace monitoring \
+  --from-literal=slack-webhook-url="$SLACK_WEBHOOK_URL" \
+  --dry-run=client -o yaml | kubectl apply -f -
+
 echo "=== Installing Prometheus Operator stack ==="
 helm upgrade --install prometheus prometheus-community/kube-prometheus-stack \
   --namespace monitoring \

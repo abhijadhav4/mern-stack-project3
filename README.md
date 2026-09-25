@@ -370,6 +370,29 @@ kubectl describe pod POD_NAME -n mern
 
 # Monitoring
 
+Install the monitoring stack and configure Slack notifications. The webhook is read
+from the environment and is never stored in the repository:
+
+```bash
+export SLACK_WEBHOOK_URL="https://hooks.slack.com/services/REPLACE_ME"
+./monitoring/install.sh
+```
+
+The monitoring installation creates the Alertmanager secret, installs Prometheus
+and Grafana, applies the alert rules, and registers the application ServiceMonitors.
+Alerts are sent to the `#alerts` Slack channel, including resolved notifications.
+
+The application Helm chart enables both CPU-based HPA and memory-based VPA. Deploy
+the chart and verify both autoscalers with:
+
+```bash
+./scripts/deploy.sh
+kubectl get hpa,vpa -n mern
+```
+
+VPA requires the Vertical Pod Autoscaler CRDs and controller, which
+`monitoring/install.sh` installs before the application is deployed.
+
 Prometheus
 
 ```

@@ -1,6 +1,16 @@
 # Namespace
 namespace: mern
 
+autoscaling:
+  hpa:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 5
+    cpuTargetUtilization: 70
+  vpa:
+    enabled: true
+    updateMode: Auto
+
 # Frontend Image
 frontend:
   replicaCount: 2

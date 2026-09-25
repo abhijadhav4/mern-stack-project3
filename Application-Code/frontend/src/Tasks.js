@@ -14,7 +14,7 @@ class Tasks extends Component {
             const { data } = await getTasks();
             this.setState({ tasks: data });
         } catch (error) {
-            console.log(error);
+            this.setState({ error: "Unable to load tasks. Please try again." });
         }
     }
 
@@ -24,14 +24,20 @@ class Tasks extends Component {
 
     handleSubmit = async (e) => {
         e.preventDefault();
-        const originalTasks = this.state.tasks;
+        const taskText = this.state.currentTask.trim();
+        if (!taskText) {
+            this.setState({ error: "Enter a task before adding it." });
+            return;
+        }
         try {
-            const { data } = await addTask({ task: this.state.currentTask });
-            const tasks = originalTasks;
-            tasks.push(data);
-            this.setState({ tasks, currentTask: "" });
+            const { data } = await addTask({ task: taskText });
+            this.setState((state) => ({
+                tasks: [...state.tasks, data],
+                currentTask: "",
+                error: "",
+            }));
         } catch (error) {
-            console.log(error);
+            this.setState({ error: "Unable to add the task. Please try again." });
         }
     };
 
@@ -40,6 +46,9 @@ class Tasks extends Component {
         try {
             const tasks = [...originalTasks];
             const index = tasks.findIndex((task) => task._id === currentTask);
+            if (index === -1) {
+                return;
+            }
             tasks[index] = { ...tasks[index] };
             tasks[index].completed = !tasks[index].completed;
             this.setState({ tasks });
@@ -47,8 +56,7 @@ class Tasks extends Component {
                 completed: tasks[index].completed,
             });
         } catch (error) {
-            this.setState({ tasks: originalTasks });
-            console.log(error);
+            this.setState({ tasks: originalTasks, error: "Unable to update the task. Please try again." });
         }
     };
 
@@ -61,8 +69,7 @@ class Tasks extends Component {
             this.setState({ tasks });
             await deleteTask(currentTask);
         } catch (error) {
-            this.setState({ tasks: originalTasks });
-            console.log(error);
+            this.setState({ tasks: originalTasks, error: "Unable to delete the task. Please try again." });
         }
     };
 }

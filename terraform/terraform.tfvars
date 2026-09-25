@@ -3,10 +3,10 @@ environment = "dev"
 aws_region = "ap-south-1"
 
 cluster_name = "mern-eks-cluster"
-kubernetes_version = "1.30"
+kubernetes_version = "1.31"
 node_instance_type = "c7i-flex.large"
 
-desired_size = 1
+desired_size = 2
 min_size = 1
 max_size = 2
 

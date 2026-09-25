@@ -4,7 +4,7 @@ import { Paper, TextField, Checkbox, Button } from "@material-ui/core";
 import "./App.css"; // Update your CSS file accordingly
 
 class App extends Tasks {
-    state = { tasks: [], currentTask: "" };
+    state = { tasks: [], currentTask: "", error: "" };
 
     render() {
         const { tasks, currentTask } = this.state;
@@ -15,6 +15,7 @@ class App extends Tasks {
                 </header>
                 <div className="main-content">
                     <Paper elevation={3} className="todo-container">
+                        {this.state.error && <p role="alert">{this.state.error}</p>}
                         <form onSubmit={this.handleSubmit} className="task-form">
                             <TextField
                                 variant="outlined"

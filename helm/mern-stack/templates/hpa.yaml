@@ -1,3 +1,4 @@
+{{- if .Values.autoscaling.hpa.enabled }}
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 
@@ -11,8 +12,8 @@ spec:
     kind: Deployment
     name: backend
 
-  minReplicas: {{ .Values.backend.replicaCount }}
-  maxReplicas: 5
+  minReplicas: {{ .Values.autoscaling.hpa.minReplicas }}
+  maxReplicas: {{ .Values.autoscaling.hpa.maxReplicas }}
 
   metrics:
     - type: Resource
@@ -20,7 +21,7 @@ spec:
         name: cpu
         target:
           type: Utilization
-          averageUtilization: 70
+          averageUtilization: {{ .Values.autoscaling.hpa.cpuTargetUtilization }}
 
 ---
 
@@ -37,8 +38,8 @@ spec:
     kind: Deployment
     name: frontend
 
-  minReplicas: {{ .Values.frontend.replicaCount }}
-  maxReplicas: 5
+  minReplicas: {{ .Values.autoscaling.hpa.minReplicas }}
+  maxReplicas: {{ .Values.autoscaling.hpa.maxReplicas }}
 
   metrics:
     - type: Resource
@@ -46,4 +47,5 @@ spec:
         name: cpu
         target:
           type: Utilization
-          averageUtilization: 70
+          averageUtilization: {{ .Values.autoscaling.hpa.cpuTargetUtilization }}
+{{- end }}

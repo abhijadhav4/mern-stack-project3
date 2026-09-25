@@ -1,0 +1,37 @@
+{{- if .Values.autoscaling.vpa.enabled }}
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: backend-vpa
+  namespace: {{ .Values.namespace }}
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: backend
+  updatePolicy:
+    updateMode: {{ .Values.autoscaling.vpa.updateMode }}
+  resourcePolicy:
+    containerPolicies:
+      - containerName: backend
+        controlledResources:
+          - memory
+---
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: frontend-vpa
+  namespace: {{ .Values.namespace }}
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: frontend
+  updatePolicy:
+    updateMode: {{ .Values.autoscaling.vpa.updateMode }}
+  resourcePolicy:
+    containerPolicies:
+      - containerName: frontend
+        controlledResources:
+          - memory
+{{- end }}

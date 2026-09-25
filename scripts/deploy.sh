@@ -23,5 +23,7 @@ echo "=== Verifying Deployment ==="
 kubectl get pods -n mern
 kubectl get svc -n mern
 kubectl get deployment -n mern
+kubectl get hpa -n mern
+kubectl get vpa -n mern
 
 echo "=== Deployment Complete ==="

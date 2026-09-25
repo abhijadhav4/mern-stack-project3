@@ -23,7 +23,26 @@ grafana:
 
 alertmanager:
   enabled: true
+  config:
+    global:
+      resolve_timeout: 5m
+    route:
+      receiver: slack
+      group_by:
+        - alertname
+        - namespace
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 4h
+    receivers:
+      - name: slack
+        slack_configs:
+          - api_url_file: /etc/alertmanager/secrets/alertmanager-slack/slack-webhook-url
+            channel: '#alerts'
+            send_resolved: true
   alertmanagerSpec:
+    secrets:
+      - alertmanager-slack
     storage:
       volumeClaimTemplate:
         spec:
