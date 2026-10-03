@@ -32,6 +32,15 @@ spec:
             summary: "Pod {{ $labels.pod }} is not ready"
             description: "Pod {{ $labels.pod }} has been not ready for more than 5 minutes."
 
+        - alert: PodImagePullFailure
+          expr: kube_pod_container_status_waiting_reason{namespace="mern", reason=~"ErrImagePull|ImagePullBackOff"} == 1
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Pod {{ $labels.pod }} cannot pull its image"
+            description: "Container {{ $labels.container }} in namespace {{ $labels.namespace }} has image pull error {{ $labels.reason }}."
+
     - name: mern.deployment.alerts
       rules:
 
