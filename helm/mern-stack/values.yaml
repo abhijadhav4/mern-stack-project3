@@ -75,7 +75,7 @@ config:
 
 # Ingress
 ingress:
-  enabled: true
+  enabled: false
 
   className: nginx
 
