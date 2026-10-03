@@ -10,7 +10,7 @@ persistence:
   enabled: true
 
   accessModes:
-    - ReadWriteOnce
+    - ReadWriteOnce 
 
   size: 10Gi
 
