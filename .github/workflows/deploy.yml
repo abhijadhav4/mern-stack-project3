@@ -1,4 +1,4 @@
-name: Build and Deploy MERN to AWS EKS
+name: Build and Deploy MERN to AWS cloud EKS
 
 on:
   push:
@@ -120,3 +120,17 @@ jobs:
           kubectl get pods -n ${{ env.NAMESPACE }}
           kubectl get svc -n ${{ env.NAMESPACE }}
           kubectl get deployment -n ${{ env.NAMESPACE }}
+
+      - name: Notify Slack on deployment failure
+        if: ${{ failure() && env.SLACK_WEBHOOK_URL != '' }}
+        run: |
+          PODS=$(kubectl get pods -n "${NAMESPACE}" -o wide 2>&1 || true)
+          EVENTS=$(kubectl get events -n "${NAMESPACE}" --sort-by=.metadata.creationTimestamp 2>&1 | tail -n 20 || true)
+          MESSAGE=$(printf 'Deployment workflow failed.\nRepository: %s\nBranch: %s\nCommit: %s\nRun: https://github.com/%s/actions/runs/%s\n\nPods:\n%s\n\nRecent events (check for ErrImagePull, ImagePullBackOff, or CrashLoopBackOff):\n%s' \
+            "$GITHUB_REPOSITORY" "$GITHUB_REF_NAME" "$GITHUB_SHA" "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID" "$PODS" "$EVENTS")
+          PAYLOAD=$(jq -n --arg text "$MESSAGE" '{text: $text}')
+          curl --fail --silent --show-error -X POST -H 'Content-Type: application/json' --data "$PAYLOAD" "$SLACK_WEBHOOK_URL"
+
+      - name: Report missing Slack notification secret
+        if: ${{ failure() && env.SLACK_WEBHOOK_URL == '' }}
+        run: echo "Deployment failed, but Slack notification was not sent because SLACK_WEBHOOK_URL is not configured."
